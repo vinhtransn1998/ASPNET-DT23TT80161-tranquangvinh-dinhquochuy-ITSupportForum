@@ -1,14 +1,45 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<ITSupportForum.Models.Post>
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Dịch vụ IT</h5>
-        </div>
-    </div>
+@foreach (var item in Model)
+{
+    <div class="post-card">
 
-</div>
+        <img src="/uploads/@item.ImageUrl" />
+
+        <div class="post-body">
+
+            <div class="post-title">
+                @item.Title
+            </div>
+
+            <br />
+
+            <div class="post-content">
+                @item.Content
+            </div>
+
+            <br />
+
+            <small class="text-secondary">
+                @item.CreatedAt
+            </small>
+
+            <hr />
+
+            <a asp-controller="Posts"
+               asp-action="Details"
+               asp-route-id="@item.Id"
+               class="btn btn-primary btn-custom">
+
+                View Post
+
+            </a>
+
+        </div>
+
+    </div>
+}

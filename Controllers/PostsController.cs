@@ -1,7 +1,9 @@
+using ITSupportForum.Data;
+using ITSupportForum.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ITSupportForum.Models;
-using ITSupportForum.Data;
+using System.Security.Claims;
 
 namespace ITSupportForum.Controllers
 {
@@ -15,6 +17,7 @@ namespace ITSupportForum.Controllers
         }
 
         // GET: Posts
+        [Authorize]
         public async Task<IActionResult> Index(string keyword)
         {
             var posts = from p in _context.Post
@@ -30,6 +33,7 @@ namespace ITSupportForum.Controllers
         }
 
         // GET: Posts/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -50,12 +54,14 @@ namespace ITSupportForum.Controllers
         }
 
         // GET: Posts/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Posts/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -92,6 +98,8 @@ namespace ITSupportForum.Controllers
             }
 
             // SAVE DATABASE
+            post.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             _context.Add(post);
 
             await _context.SaveChangesAsync();
@@ -100,6 +108,7 @@ namespace ITSupportForum.Controllers
         }
 
         // GET: Posts/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -114,10 +123,21 @@ namespace ITSupportForum.Controllers
                 return NotFound();
             }
 
+            var currentUserId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // ADMIN HOẶC CHỦ BÀI
+            if (post.UserId != currentUserId &&
+                !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             return View(post);
         }
 
         // POST: Posts/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Post post)
@@ -126,6 +146,34 @@ namespace ITSupportForum.Controllers
             {
                 return NotFound();
             }
+
+            var oldPost = await _context.Post
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (oldPost == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // ADMIN HOẶC CHỦ BÀI
+            if (oldPost.UserId != currentUserId &&
+                !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            // GIỮ USERID CŨ
+            post.UserId = oldPost.UserId;
+
+            // GIỮ ẢNH CŨ
+            post.ImageUrl = oldPost.ImageUrl;
+
+            // GIỮ NGÀY CŨ
+            post.CreatedAt = oldPost.CreatedAt;
 
             try
             {
@@ -147,6 +195,7 @@ namespace ITSupportForum.Controllers
         }
 
         // GET: Posts/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -162,20 +211,43 @@ namespace ITSupportForum.Controllers
                 return NotFound();
             }
 
+            var currentUserId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // ADMIN HOẶC CHỦ BÀI
+            if (post.UserId != currentUserId &&
+                !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             return View(post);
         }
 
         // POST: Posts/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var post = await _context.Post.FindAsync(id);
 
-            if (post != null)
+            if (post == null)
             {
-                _context.Post.Remove(post);
+                return NotFound();
             }
+
+            var currentUserId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // ADMIN HOẶC CHỦ BÀI
+            if (post.UserId != currentUserId &&
+                !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            _context.Post.Remove(post);
 
             await _context.SaveChangesAsync();
 

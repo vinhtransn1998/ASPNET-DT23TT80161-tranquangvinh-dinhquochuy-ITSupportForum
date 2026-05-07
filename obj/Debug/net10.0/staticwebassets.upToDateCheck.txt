@@ -62,6 +62,11 @@ wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
 wwwroot\uploads\39e52563-f260-478e-8f49-cede4b30abfe.png
+wwwroot\uploads\4eb3070d-1826-47d7-ba9c-995e9df62909.jfif
+wwwroot\uploads\5a2b4019-4b09-4640-af35-97625c022e7f.jfif
+wwwroot\uploads\95c7a180-a768-4cf1-adf3-8ab284786e5d.png
+wwwroot\uploads\accbd825-e828-4a91-8695-769474faa6c5.jfif
+wwwroot\uploads\bf6447b1-1392-4ebb-8d5b-9af5a0afddfc.png
 D:\website\New folder\ITSupportForum\ITSupportForum\wwwroot\css\site.css
 D:\website\New folder\ITSupportForum\ITSupportForum\wwwroot\favicon.ico
 D:\website\New folder\ITSupportForum\ITSupportForum\wwwroot\js\site.js
