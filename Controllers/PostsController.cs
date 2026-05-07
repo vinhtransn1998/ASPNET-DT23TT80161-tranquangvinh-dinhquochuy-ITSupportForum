@@ -15,9 +15,18 @@ namespace ITSupportForum.Controllers
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string keyword)
         {
-            return View(await _context.Post.ToListAsync());
+            var posts = from p in _context.Post
+                        select p;
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                posts = posts.Where(x =>
+                    x.Title.Contains(keyword));
+            }
+
+            return View(await posts.ToListAsync());
         }
 
         // GET: Posts/Details/5
@@ -29,7 +38,8 @@ namespace ITSupportForum.Controllers
             }
 
             var post = await _context.Post
-                .FirstOrDefaultAsync(m => m.Id == id);
+    .Include(p => p.Comments)
+    .FirstOrDefaultAsync(m => m.Id == id);
 
             if (post == null)
             {
@@ -175,6 +185,25 @@ namespace ITSupportForum.Controllers
         private bool PostExists(int id)
         {
             return _context.Post.Any(e => e.Id == id);
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddComment(
+    int postId,
+    string content)
+        {
+            var comment = new Comment
+            {
+                PostId = postId,
+                Content = content
+            };
+
+            _context.Comment.Add(comment);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(
+                "Details",
+                new { id = postId });
         }
     }
 }
