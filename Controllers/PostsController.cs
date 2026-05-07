@@ -1,97 +1,126 @@
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ITSupportForum.Models;
 using ITSupportForum.Data;
 
-public class PostsController : Controller
+namespace ITSupportForum.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public PostsController(ApplicationDbContext context)
+    public class PostsController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // GET: POSTS
-    public async Task<IActionResult> Index()    
-    {
-        return View(await _context.Post.ToListAsync());
-    }
-
-    // GET: POSTS/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public PostsController(ApplicationDbContext context)
         {
-            return NotFound();
+            _context = context;
         }
 
-        var post = await _context.Post
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (post == null)
+        // GET: Posts
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            return View(await _context.Post.ToListAsync());
         }
 
-        return View(post);
-    }
-
-    // GET: POSTS/Create
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: POSTS/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Title,Content,ImageUrl,CreatedAt")] Post post)
-    {
-        if (ModelState.IsValid)
+        // GET: Posts/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var post = await _context.Post
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            return View(post);
+        }
+
+        // GET: Posts/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Posts/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(
+            Post post,
+            IFormFile file)
+        {
+            // AUTO DATE
+            post.CreatedAt = DateTime.Now;
+
+            // UPLOAD IMAGE
+            if (file != null)
+            {
+                var fileName = Guid.NewGuid().ToString()
+                    + Path.GetExtension(file.FileName);
+
+                var uploadPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/uploads");
+
+                // TẠO FOLDER NẾU CHƯA CÓ
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                post.ImageUrl = fileName;
+            }
+
+            // SAVE DATABASE
             _context.Add(post);
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
-        return View(post);
-    }
 
-    // GET: POSTS/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
+        // GET: Posts/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var post = await _context.Post.FindAsync(id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            return View(post);
         }
 
-        var post = await _context.Post.FindAsync(id);
-        if (post == null)
+        // POST: Posts/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Post post)
         {
-            return NotFound();
-        }
-        return View(post);
-    }
+            if (id != post.Id)
+            {
+                return NotFound();
+            }
 
-    // POST: POSTS/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("Id,Title,Content,ImageUrl,CreatedAt")] Post post)
-    {
-        if (id != post.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
             try
             {
                 _context.Update(post);
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -100,51 +129,52 @@ public class PostsController : Controller
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
+
             return RedirectToAction(nameof(Index));
         }
-        return View(post);
-    }
 
-    // GET: POSTS/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
+        // GET: Posts/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var post = await _context.Post
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            return View(post);
         }
 
-        var post = await _context.Post
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (post == null)
+        // POST: Posts/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            return NotFound();
+            var post = await _context.Post.FindAsync(id);
+
+            if (post != null)
+            {
+                _context.Post.Remove(post);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
-        return View(post);
-    }
-
-    // POST: POSTS/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? id)
-    {
-        var post = await _context.Post.FindAsync(id);
-        if (post != null)
+        private bool PostExists(int id)
         {
-            _context.Post.Remove(post);
+            return _context.Post.Any(e => e.Id == id);
         }
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    private bool PostExists(int? id)
-    {
-        return _context.Post.Any(e => e.Id == id);
     }
 }
