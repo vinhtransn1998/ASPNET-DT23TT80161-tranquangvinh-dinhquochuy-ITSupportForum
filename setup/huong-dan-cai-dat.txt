@@ -1,0 +1,53 @@
+HUONG DAN CAI DAT WEBSITE GIOI THIEU KHU DU LICH BIEN BA DONG
+
+1. Yeu cau phan mem
+- Visual Studio 2022
+- SQL Server hoac SQL Server LocalDB
+- .NET SDK 8.0
+- Git
+
+2. Cach mo project
+- Giai nen source code hoac clone tu GitHub
+- Mo file BaDongTourism.sln bang Visual Studio 2022
+
+3. Cau hinh database
+- Mo file appsettings.json
+- Kiem tra chuoi ket noi:
+
+"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=BaDongTourismDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+
+4. Tao database bang Migration
+- Vao Tools > NuGet Package Manager > Package Manager Console
+- Chay lenh:
+
+Update-Database
+
+5. Neu muon tao database bang file SQL
+- Mo SQL Server Object Explorer
+- Tao New Query
+- Mo file setup/database.sql
+- Chay toan bo noi dung file SQL
+
+6. Chay website
+- Bam nut HTTPS hoac F5 trong Visual Studio
+
+7. Tai khoan admin
+- Duong dan dang nhap:
+  /Admin/Account/Login
+
+- Username:
+  admin@gmail.com
+
+- Password:
+  Admin123!
+
+8. Chuc nang chinh
+- Trang chu gioi thieu bien Ba Dong
+- Trang danh sach bai viet
+- Trang chi tiet bai viet
+- Trang lien he
+- Dang nhap admin
+- Them bai viet
+- Sua bai viet
+- Xoa bai viet
+- Upload anh bai viet
